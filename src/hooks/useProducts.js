@@ -1,21 +1,19 @@
-import { useState, useEffect, useMemo } from 'react';
-import { PRODUCTS as mockProducts } from '../data/mockProducts';
-import { productApi } from '../api/productApi';
-import { filterProducts } from '../utils/filterProducts';
-import { sortProducts } from '../utils/sortProducts';
+import { useState, useEffect, useMemo, useContext } from 'react';
+import { ProductContext } from '../context/ProductContext';
 
-/**
- * Custom hook managing the filters, sorting, and processed products list.
- * Supports API queries with automatic fallback to mockProducts.
- * 
- * @param {string} category Category parameter (hand, face, eye, hearing)
- */
 export function useProducts(category) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const context = useContext(ProductContext);
+  
+  // Return dummy object if used outside ProductProvider to prevent early crashes
+  const {
+    products: contextProducts = [],
+    loading = false,
+    addProduct = () => {},
+    updateProduct = () => {},
+    deleteProduct = () => {},
+  } = context || {};
 
-  // Filtering checkbox states
+  // Filtering checkbox states (for CategoryPage)
   const [subcategories, setSubcategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [industries, setIndustries] = useState([]);
@@ -55,105 +53,183 @@ export function useProducts(category) {
     setReusables([]);
   }, [category]);
 
-  // Load products list from backend API
-  const getProducts = async (params) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const apiResponse = await productApi.getAll(params);
-      // Verify response structure
-      if (Array.isArray(apiResponse)) {
-        setProducts(apiResponse);
-      } else if (apiResponse && Array.isArray(apiResponse.data)) {
-        setProducts(apiResponse.data);
-      } else {
-        setProducts([]);
-      }
-    } catch (err) {
-      console.warn('Backend API connection offline. Returning empty product list.', err.message);
-      setProducts([]);
-    } finally {
-      setLoading(false);
+  // Expose business logic helper functions:
+  const getProductById = (id) => {
+    return contextProducts.find((p) => p.id === id);
+  };
+
+  const getProductsByCategory = (cat) => {
+    return contextProducts.filter((p) => p.category === cat);
+  };
+
+  const getFeaturedProducts = () => {
+    return contextProducts.slice(0, 8);
+  };
+
+  const getNewArrivals = () => {
+    return [...contextProducts].sort((a, b) => {
+      const dateA = new Date(a.dateAdded || a.createdAt || 0);
+      const dateB = new Date(b.dateAdded || b.createdAt || 0);
+      return dateB - dateA;
+    });
+  };
+
+  const searchProducts = (query) => {
+    if (!query) return contextProducts;
+    const cleanQuery = query.toLowerCase();
+    return contextProducts.filter(
+      (p) =>
+        (p.title && p.title.toLowerCase().includes(cleanQuery)) ||
+        (p.category && p.category.toLowerCase().includes(cleanQuery)) ||
+        (p.brand && p.brand.toLowerCase().includes(cleanQuery))
+    );
+  };
+
+  // Pure filtering business logic function
+  const filterProducts = (productsList, cat, select) => {
+    if (!productsList) return [];
+    
+    // 1. Filter by category first if it is specified
+    let list = cat ? productsList.filter(p => p.category === cat) : productsList;
+
+    const {
+      subcategories = [],
+      brands = [],
+      industries = [],
+      origins = [],
+      priceMax = 6000,
+      resistances = [],
+      materials = [],
+      lenses = [],
+      snrs = [],
+      reusables = []
+    } = select || {};
+
+    // 2. Subcategory
+    if (subcategories.length > 0) {
+      list = list.filter(p => {
+        if (cat === 'hand') {
+          return subcategories.includes('Safety Gloves') ? p.title?.includes('Gloves') : p.title?.includes('Sleeves');
+        }
+        if (cat === 'face') {
+          return subcategories.includes('Welding and Face Shield');
+        }
+        if (cat === 'eye') {
+          const isAccessory = p.lensType === 'Accessories';
+          if (subcategories.includes('Safety Goggles and Spectacles') && !isAccessory) return true;
+          if (subcategories.includes('Eye Accessories') && isAccessory) return true;
+          return false;
+        }
+        if (cat === 'hearing') {
+          const isPlugs = p.title?.includes('Plugs');
+          if (subcategories.includes('Ear Plugs') && isPlugs) return true;
+          if (subcategories.includes('Ear Muffs') && !isPlugs) return true;
+          return false;
+        }
+        return true;
+      });
+    }
+
+    // 3. Brand
+    if (brands.length > 0) {
+      list = list.filter(p => brands.includes(p.brand));
+    }
+
+    // 4. Industry
+    if (industries.length > 0) {
+      list = list.filter(p => industries.includes(p.industry));
+    }
+
+    // 5. Origin
+    if (origins.length > 0 && (cat === 'hand' || cat === 'eye' || cat === 'hearing')) {
+      list = list.filter(p => origins.includes(p.countryOfOrigin));
+    }
+
+    // 6. Price
+    list = list.filter(p => p.price <= priceMax);
+
+    // 7. Hand Specific: Resistance
+    if (cat === 'hand' && resistances.length > 0) {
+      list = list.filter(p => resistances.includes(p.resistanceType));
+    }
+
+    // 8. Face Specific: Material
+    if (cat === 'face' && materials.length > 0) {
+      list = list.filter(p => materials.includes(p.material));
+    }
+
+    // 9. Eye Specific: Lens Type
+    if (cat === 'eye' && lenses.length > 0) {
+      list = list.filter(p => lenses.includes(p.lensType));
+    }
+
+    // 10. Hearing Specific: SNR Rating
+    if (cat === 'hearing' && snrs.length > 0) {
+      list = list.filter(p => snrs.includes(p.snrDnr));
+    }
+
+    // 11. Hearing Specific: Reusable
+    if (cat === 'hearing' && reusables.length > 0) {
+      list = list.filter(p => reusables.includes(p.reusable));
+    }
+
+    return list;
+  };
+
+  // Pure sorting business logic function
+  const sortProducts = (productsList, sortType) => {
+    if (!productsList) return [];
+    const list = [...productsList];
+
+    switch (sortType) {
+      case 'price-low':
+        return list.sort((a, b) => a.price - b.price);
+      case 'price-high':
+        return list.sort((a, b) => b.price - a.price);
+      case 'newest':
+        return list.sort((a, b) => new Date(b.dateAdded || b.createdAt || 0) - new Date(a.dateAdded || a.createdAt || 0));
+      case 'relevant':
+      default:
+        return list;
     }
   };
 
-  const getProductById = async (id) => {
-    try {
-      return await productApi.getById(id);
-    } catch (err) {
-      console.warn(`Failed to fetch product details for ${id}.`);
-      return null;
-    }
-  };
-
-  const createProduct = async (data) => {
-    try {
-      return await productApi.create(data);
-    } catch (err) {
-      console.warn('Creating product offline...');
-      return data;
-    }
-  };
-
-  const updateProduct = async (id, data) => {
-    try {
-      return await productApi.update(id, data);
-    } catch (err) {
-      console.warn('Updating product offline...');
-      return data;
-    }
-  };
-
-  const deleteProduct = async (id) => {
-    try {
-      return await productApi.delete(id);
-    } catch (err) {
-      console.warn('Deleting product offline...');
-      return id;
-    }
-  };
-
-  useEffect(() => {
-    getProducts();
-  }, []);
-
-  const toggleVal = (state, setState, val) => {
-    if (state.includes(val)) {
-      setState(state.filter((item) => item !== val));
-    } else {
-      setState([...state, val]);
-    }
-  };
-
-  // computed filtered and sorted products list
+  // Compute filtered & sorted list if category is provided, else return all contextProducts
   const processedProducts = useMemo(() => {
-    const filtered = filterProducts(products, category, selections);
+    if (!category) {
+      return contextProducts;
+    }
+    const filtered = filterProducts(contextProducts, category, selections);
     return sortProducts(filtered, sort);
-  }, [products, category, selections, sort]);
+  }, [contextProducts, category, selections, sort]);
 
   return {
     products: processedProducts,
     loading,
-    error,
     sort,
     setSort,
     selections,
     priceMax,
     setPriceMax,
-    getProducts,
-    getProductById,
-    createProduct,
+    addProduct,
     updateProduct,
     deleteProduct,
-    toggleSubcategory: (val) => toggleVal(subcategories, setSubcategories, val),
-    toggleBrand: (val) => toggleVal(brands, setBrands, val),
-    toggleIndustry: (val) => toggleVal(industries, setIndustries, val),
-    toggleOrigin: (val) => toggleVal(origins, setOrigins, val),
-    toggleResistance: (val) => toggleVal(resistances, setResistances, val),
-    toggleMaterial: (val) => toggleVal(materials, setMaterials, val),
-    toggleLens: (val) => toggleVal(lenses, setLenses, val),
-    toggleSNR: (val) => toggleVal(snrs, setSnrs, val),
-    toggleReusable: (val) => toggleVal(reusables, setReusables, val)
+    getProductById,
+    getProductsByCategory,
+    getFeaturedProducts,
+    getNewArrivals,
+    searchProducts,
+    filterProducts,
+    sortProducts,
+    toggleSubcategory: (val) => setSubcategories((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleBrand: (val) => setBrands((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleIndustry: (val) => setIndustries((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleOrigin: (val) => setOrigins((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleResistance: (val) => setResistances((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleMaterial: (val) => setMaterials((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleLens: (val) => setLenses((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleSNR: (val) => setSnrs((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
+    toggleReusable: (val) => setReusables((prev) => prev.includes(val) ? prev.filter((i) => i !== val) : [...prev, val]),
   };
 }
 

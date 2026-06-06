@@ -22,8 +22,8 @@ export function ProtectedRoute({ children, allowedRoles = [] }) {
   }
 
   if (allowedRoles.length > 0 && (!user || !allowedRoles.includes(user.role))) {
-    // Redirect unauthorized roles back to landing page
-    return <Navigate to="/" replace />;
+    const requiresAdmin = allowedRoles.includes('ADMIN') || allowedRoles.includes('SUPER_ADMIN') || allowedRoles.includes('MANAGER');
+    return <Navigate to={requiresAdmin ? "/admin/login" : "/login"} replace />;
   }
 
   return children;

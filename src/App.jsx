@@ -4,6 +4,11 @@ import { ROUTES } from './constants/routes';
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
+import ProductPage from './pages/ProductPage';
+import SearchResults from './pages/SearchResults';
+import Cart from './pages/Cart';
+import Wishlist from './pages/Wishlist';
+import LoginPage from './pages/LoginPage';
 
 // Import Global Context Providers
 import { UIProvider } from './context/UIContext';
@@ -11,6 +16,7 @@ import { SearchProvider } from './context/SearchContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
 
 // Import Route Guards
 import UserRoutes from './routes/UserRoutes';
@@ -29,11 +35,12 @@ import Settings from './pages/admin/Settings';
 function App() {
   return (
     <AuthProvider>
-      <UIProvider>
-        <SearchProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <Routes>
+      <ProductProvider>
+        <UIProvider>
+          <SearchProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <Routes>
                 
                 {/* 1. Public client-side routes wrapped in MainLayout */}
                 <Route element={<MainLayout />}>
@@ -53,18 +60,19 @@ function App() {
                   <Route path="/gas-detector" element={<Navigate to="/category/gas-detector" replace />} />
 
                   {/* Auth screen placeholders */}
-                  <Route path="/login" element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">Login screen placeholder (Toggle user icon in Header)</div>} />
+                  <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">Register account placeholder</div>} />
                   
                   {/* 2. Customer-protected routes */}
                   <Route element={<UserRoutes />}>
                     <Route path="/profile" element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">User Profile details</div>} />
                     <Route path="/orders" element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">User Orders History</div>} />
-                    <Route path="/cart" element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">Shopping Cart View</div>} />
-                    <Route path="/wishlist" element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">User Wishlist View</div>} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
                   </Route>
 
-                  <Route path={ROUTES.PRODUCT} element={<div className="p-16 text-center text-xs font-bold uppercase tracking-widest text-neutral-500">Product Detail view placeholder</div>} />
+                  <Route path="/search" element={<SearchResults />} />
+                  <Route path={ROUTES.PRODUCT} element={<ProductPage />} />
                 </Route>
 
                 {/* 3. Admin Login route (Unprotected) */}
@@ -89,10 +97,11 @@ function App() {
                 </Route>
 
               </Routes>
-            </CartProvider>
-          </WishlistProvider>
-        </SearchProvider>
-      </UIProvider>
+              </CartProvider>
+            </WishlistProvider>
+          </SearchProvider>
+        </UIProvider>
+      </ProductProvider>
     </AuthProvider>
   );
 }

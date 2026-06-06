@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PRODUCTS } from '../../data/mockProducts';
+import { useProductContext } from '../../context/ProductContext';
 import { Plus, Edit3, Trash2, Search, X, Loader, SlidersHorizontal, Image as ImageIcon } from 'lucide-react';
 
 function ProductsManagement() {
-  // Initialize local state as empty by default
-  const [products, setProducts] = useState([]);
+  const { products, addProduct, updateProduct, deleteProduct, loading } = useProductContext();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -25,7 +24,7 @@ function ProductsManagement() {
   // Delete product action
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      setProducts(products.filter(p => p.id !== id));
+      deleteProduct(id);
     }
   };
 
@@ -56,7 +55,7 @@ function ProductsManagement() {
       dateAdded: new Date().toISOString().split('T')[0]
     };
 
-    setProducts([newProduct, ...products]);
+    addProduct(newProduct);
     setIsAddOpen(false);
   };
 
@@ -76,18 +75,13 @@ function ProductsManagement() {
     e.preventDefault();
     if (!formName || !formPrice || formStock === '') return;
 
-    setProducts(products.map(p => 
-      p.id === currentProduct.id 
-        ? {
-            ...p,
-            title: formName,
-            category: formCategory,
-            price: Number(formPrice),
-            stock: Number(formStock),
-            image: formImage
-          }
-        : p
-    ));
+    updateProduct(currentProduct.id, {
+      title: formName,
+      category: formCategory,
+      price: Number(formPrice),
+      stock: Number(formStock),
+      image: formImage
+    });
     setIsEditOpen(false);
   };
 
@@ -173,7 +167,16 @@ function ProductsManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/80 text-gray-350">
-              {filteredProducts.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-12 text-gray-500 font-medium animate-pulse">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader className="w-5 h-5 animate-spin text-brand-red" />
+                      <span>Loading products catalog...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-12 text-gray-500 font-medium">
                     No products found matching the criteria.
