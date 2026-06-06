@@ -16,6 +16,7 @@ src/
  │    └── userApi.js        # User account management endpoints
  │
  ├── constants/         # Static global constants
+ │    ├── categories.js     # Exact subcategory slug and label maps
  │    ├── colors.js         # Theme color codes
  │    ├── navLinks.js       # Menu categories URLs
  │    ├── roles.js          # Authorization system roles mapping (ROLES)
@@ -27,9 +28,6 @@ src/
  │    ├── SearchContext.jsx # Real-time queries input in Header search
  │    ├── UIContext.jsx     # Boolean visibilities of CartDrawer, LoginModal, and MobileMenu
  │    └── WishlistContext.jsx # Items marked as favorites
- │
- ├── data/              # Fallback local datasets
- │    └── mockProducts.js   # 40 premium products for offline testing
  │
  ├── hooks/             # Custom React hooks consuming APIs and Contexts
  │    ├── useAuth.js        # Exposes authentication functions (login, logout, register)
@@ -81,6 +79,7 @@ The application employs a role-based authorization model defined in `src/constan
 - **Public Routes**:
   - `/` (Home landing page)
   - `/category/:category` (Split-layout sidebar filters & grid)
+  - `/:category/:subcategory` (Dynamic subcategory routing matching exact fields)
   - `/login`, `/register` (Authentication form entries)
 - **Protected Client Routes** (Requires `CUSTOMER` or higher):
   - `/profile` (Personal profile configurations)
@@ -117,7 +116,7 @@ The frontend expects the backend endpoints to adhere to the following contracts:
     ```
 
 ### B. Products Catalog (`/products`)
-- **`GET /products`** -> Returns product list (supports filtering by `category`, `brand`, etc.).
+- **`GET /products`** -> Returns product list (supports filtering by `category`, `subcategory`, `brand`, etc.).
   - *Response Schema*:
     ```json
     [
@@ -125,6 +124,7 @@ The frontend expects the backend endpoints to adhere to the following contracts:
         "id": "prod-101",
         "title": "KARAM HS61 Gloves",
         "category": "hand",
+        "subcategory": "cut-resistant-gloves",
         "image": "http://localhost:5000/images/glove.jpg",
         "price": 879,
         "originalPrice": 1278,
