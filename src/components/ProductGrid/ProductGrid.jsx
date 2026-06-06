@@ -55,7 +55,7 @@ function ProductGrid({ products = [], currentSort = 'relevant', onSortChange }) 
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center"
         >
           {products.map((product) => (
             <motion.div key={product.id} variants={itemVariants}>

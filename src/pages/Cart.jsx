@@ -8,7 +8,7 @@ export function Cart() {
 
   return (
     <div className="w-full bg-white min-h-screen font-sans select-none pb-16">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-12">
+      <div className="max-w-[1320px] mx-auto px-5 py-12 w-full">
         <h1 className="text-2xl font-black uppercase tracking-wider text-neutral-800 mb-8">
           Your Shopping Cart
         </h1>

@@ -51,7 +51,7 @@ export function ProductPage() {
 
   return (
     <div className="w-full bg-white min-h-screen font-sans select-none pb-16">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-8 sm:py-12">
+      <div className="max-w-[1320px] mx-auto px-5 py-8 sm:py-12">
         {/* Breadcrumb */}
         <div className="text-xs text-neutral-400 font-semibold mb-8">
           <Link to="/" className="hover:text-[#E31E24]">Home</Link>

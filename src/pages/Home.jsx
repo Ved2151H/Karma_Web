@@ -9,11 +9,13 @@ function Home() {
       {/* Hero Slider Section */}
       <HeroBanner />
 
-      {/* Featured Products Section */}
-      <FeaturedProducts />
+      <div className="max-w-[1320px] mx-auto px-5 w-full">
+        {/* Featured Products Section */}
+        <FeaturedProducts />
 
-      {/* New Arrivals Section */}
-      <NewArrivals />
+        {/* New Arrivals Section */}
+        <NewArrivals />
+      </div>
     </div>
   );
 }

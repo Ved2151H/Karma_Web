@@ -10,15 +10,14 @@ function Header() {
   const { setIsCartOpen, setIsLoginOpen } = useUI();
 
   return (
-    <header className="w-full font-sans select-none">
-      
-      {/* Top Information Bar (Height: 36px) */}
+    <header className="w-full font-sans select-none bg-black border-b border-neutral-900">
+      {/* Top Strip (Height: 18px) */}
       <div 
-        className="h-9 text-white text-[13px] px-6 sm:px-12 flex items-center justify-between"
-        style={{ background: 'linear-gradient(90deg, #2b2b2b, #1f1f1f)' }}
+        className="h-[18px] text-white text-[12px] flex items-center justify-between font-sans leading-none"
+        style={{ background: 'linear-gradient(90deg, #2b2b2b, #1f1f1f)', padding: '0 48px' }}
       >
         <div>Free Shipping on Orders Above ₹499</div>
-        <div className="flex gap-1.5 items-center font-medium opacity-90">
+        <div className="flex gap-3 items-center font-medium opacity-90">
           <a href="https://www.karam.in" target="_blank" rel="noreferrer" className="hover:text-[#E31E24] transition-colors">
             Corporate Website: www.karam.in
           </a>
@@ -29,28 +28,28 @@ function Header() {
         </div>
       </div>
 
-      {/* Main Header (Height: 128px) */}
-      <div className="h-[128px] bg-black text-white flex items-center px-6 sm:px-12 border-b border-neutral-900">
-        <div className="w-full flex items-center justify-between">
+      {/* Main Header (Height: 88px) */}
+      <div className="h-[88px] bg-black text-white flex items-center" style={{ padding: '0 48px' }}>
+        <div className="w-full flex items-center">
           
-          {/* Left: Logo Section (Width: 280px, Aligned Left) */}
-          <div className="w-[280px] flex items-center justify-start shrink-0">
-            <Link to="/" className="text-[28px] font-black tracking-tight text-white leading-none">
-              KARAM <span className="text-[#E31E24]">PPE</span>
+          {/* Left Section (Width: 20%) */}
+          <div className="w-1/5 flex items-center justify-center shrink-0">
+            <Link to="/" className="text-[24px] font-black tracking-tight text-white leading-none h-[60px] flex items-center">
+              KARAM <span className="text-[#E31E24] ml-1">PPE</span>
             </Link>
           </div>
 
-          {/* Center: Search Bar (Width: 650px) */}
-          <div className="flex-grow max-w-[650px] mx-4 shrink-0">
+          {/* Center Section (Width: 60%) */}
+          <div className="w-3/5 flex items-center justify-center shrink-0">
             <SearchBar />
           </div>
 
-          {/* Right: Icons (Gap: 30px, Size: 26px, Hover Red) */}
-          <div className="flex items-center gap-[30px] justify-end shrink-0">
+          {/* Right Section (Width: 20%) */}
+          <div className="w-1/5 flex items-center justify-center gap-[30px] shrink-0">
             {/* User */}
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="text-white hover:text-[#E31E24] cursor-pointer transition-colors duration-200 focus:outline-none"
+              className="text-white hover:text-[#E31E24] cursor-pointer transition-colors duration-200 focus:outline-none flex items-center justify-center"
               aria-label="Account"
             >
               <User className="w-[26px] h-[26px]" />
@@ -59,7 +58,7 @@ function Header() {
             {/* Wishlist */}
             <Link
               to="/wishlist"
-              className="text-white hover:text-[#E31E24] transition-colors duration-200"
+              className="text-white hover:text-[#E31E24] transition-colors duration-200 flex items-center justify-center"
               aria-label="Wishlist"
             >
               <Heart className="w-[26px] h-[26px]" />
@@ -68,7 +67,7 @@ function Header() {
             {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="text-white hover:text-[#E31E24] cursor-pointer transition-colors duration-200 relative focus:outline-none"
+              className="text-white hover:text-[#E31E24] cursor-pointer transition-colors duration-200 relative focus:outline-none flex items-center justify-center"
               aria-label="Cart"
             >
               <ShoppingCart className="w-[26px] h-[26px]" />
@@ -82,7 +81,6 @@ function Header() {
 
         </div>
       </div>
-      
     </header>
   );
 }

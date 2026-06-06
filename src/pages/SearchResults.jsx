@@ -28,7 +28,7 @@ export function SearchResults() {
 
   return (
     <div className="w-full bg-white min-h-screen font-sans select-none">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-12">
+      <div className="max-w-[1320px] mx-auto px-5 py-12 w-full">
         <h1 className="text-2xl font-black uppercase tracking-wider text-neutral-800 mb-2">
           Search Results
         </h1>
@@ -41,7 +41,7 @@ export function SearchResults() {
             <p className="text-neutral-500 text-sm font-medium">No products available.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

@@ -7,7 +7,7 @@ import Filters from '../components/Filters/Filters';
 import ProductGrid from '../components/ProductGrid/ProductGrid';
 
 function CategoryPage() {
-  const { category } = useParams();
+  const { category, subcategory } = useParams();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   // Mount the custom hook to handle all filter state and sorting computation
@@ -27,15 +27,15 @@ function CategoryPage() {
     toggleLens,
     toggleSNR,
     toggleReusable
-  } = useProducts(category);
+  } = useProducts(category, subcategory);
 
   return (
     <div className="w-full bg-white min-h-screen">
       {/* Category split layout starts immediately below the navbar */}
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-8 flex flex-col md:flex-row gap-8">
+      <div className="max-w-[1320px] mx-auto px-5 py-8 flex flex-col md:flex-row gap-[32px] items-start w-full">
         
-        {/* Desktop Sidebar Filters (25% Width, Hidden on Mobile/Tablet) */}
-        <aside className="hidden md:block w-1/4 min-w-[240px] max-w-[280px] bg-white border border-neutral-200 rounded-xl p-6 h-fit sticky top-[160px] max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-none shadow-xs">
+        {/* Desktop Sidebar Filters (280px Width, Hidden on Mobile/Tablet) */}
+        <aside className="hidden md:block w-[280px] shrink-0 bg-white border border-neutral-200 rounded-xl p-6 h-fit sticky top-[160px] max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-none shadow-xs">
           <div className="flex items-center gap-2 pb-4 mb-4 border-b border-neutral-200 select-none">
             <Filter className="w-4 h-4 text-neutral-800" />
             <h3 className="font-display text-xs font-extrabold uppercase tracking-widest text-neutral-800">
@@ -60,13 +60,13 @@ function CategoryPage() {
           />
         </aside>
 
-        {/* Product Grid Area (75% Width on Desktop) */}
-        <div className="w-full md:w-3/4 flex-grow">
+        {/* Product Grid Area (Remaining width on Desktop) */}
+        <div className="flex-1 w-full">
           {/* Mobile Filter Toggle Row (Visible below 768px) */}
           <div className="md:hidden flex justify-between items-center mb-6 select-none">
             <button
-              onClick={() => setIsFilterDrawerOpen(true)}
-              className="bg-[#1B1B1B] text-white px-4.5 py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm active:bg-neutral-800 transition-colors"
+               onClick={() => setIsFilterDrawerOpen(true)}
+               className="bg-[#1B1B1B] text-white px-4.5 py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm active:bg-neutral-800 transition-colors"
             >
               <Filter className="w-3.5 h-3.5" /> Filter Products
             </button>

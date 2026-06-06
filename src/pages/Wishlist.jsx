@@ -7,7 +7,7 @@ export function Wishlist() {
 
   return (
     <div className="w-full bg-white min-h-screen font-sans select-none pb-16">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-12">
+      <div className="max-w-[1320px] mx-auto px-5 py-12 w-full">
         <h1 className="text-2xl font-black uppercase tracking-wider text-neutral-800 mb-8">
           Your Wishlist
         </h1>
@@ -18,7 +18,7 @@ export function Wishlist() {
             <p className="text-neutral-500 text-xs font-semibold">Start adding products to your wishlist.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
             {wishlistItems.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

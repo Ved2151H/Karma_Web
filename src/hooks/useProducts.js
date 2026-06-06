@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
 import { ProductContext } from '../context/ProductContext';
 
-export function useProducts(category) {
+export function useProducts(category, subcategory) {
   const context = useContext(ProductContext);
   
   // Return dummy object if used outside ProductProvider to prevent early crashes
@@ -51,7 +51,7 @@ export function useProducts(category) {
     setLenses([]);
     setSnrs([]);
     setReusables([]);
-  }, [category]);
+  }, [category, subcategory]);
 
   // Expose business logic helper functions:
   const getProductById = (id) => {
@@ -105,29 +105,9 @@ export function useProducts(category) {
       reusables = []
     } = select || {};
 
-    // 2. Subcategory
+    // 2. Subcategory (using exact matching on subcategory field, not parsing titles)
     if (subcategories.length > 0) {
-      list = list.filter(p => {
-        if (cat === 'hand') {
-          return subcategories.includes('Safety Gloves') ? p.title?.includes('Gloves') : p.title?.includes('Sleeves');
-        }
-        if (cat === 'face') {
-          return subcategories.includes('Welding and Face Shield');
-        }
-        if (cat === 'eye') {
-          const isAccessory = p.lensType === 'Accessories';
-          if (subcategories.includes('Safety Goggles and Spectacles') && !isAccessory) return true;
-          if (subcategories.includes('Eye Accessories') && isAccessory) return true;
-          return false;
-        }
-        if (cat === 'hearing') {
-          const isPlugs = p.title?.includes('Plugs');
-          if (subcategories.includes('Ear Plugs') && isPlugs) return true;
-          if (subcategories.includes('Ear Muffs') && !isPlugs) return true;
-          return false;
-        }
-        return true;
-      });
+      list = list.filter(p => subcategories.includes(p.subcategory));
     }
 
     // 3. Brand
@@ -199,9 +179,17 @@ export function useProducts(category) {
     if (!category) {
       return contextProducts;
     }
-    const filtered = filterProducts(contextProducts, category, selections);
+    // Filter first by category and hook-level subcategory if provided
+    let list = contextProducts;
+    if (category) {
+      list = list.filter(p => p.category === category);
+    }
+    if (subcategory) {
+      list = list.filter(p => p.subcategory === subcategory);
+    }
+    const filtered = filterProducts(list, category, selections);
     return sortProducts(filtered, sort);
-  }, [contextProducts, category, selections, sort]);
+  }, [contextProducts, category, subcategory, selections, sort]);
 
   return {
     products: processedProducts,

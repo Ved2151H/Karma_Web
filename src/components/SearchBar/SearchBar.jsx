@@ -15,16 +15,16 @@ function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-[650px] h-[56px]">
+    <form onSubmit={handleSubmit} className="relative w-full max-w-[720px] h-[50px] flex items-center">
       <input
         type="text"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Enter Keyword or Item"
-        className="w-full h-full bg-transparent border border-[rgba(255,255,255,0.35)] rounded-[40px] pl-14 pr-6 text-sm text-white placeholder-neutral-400 focus:outline-none focus:border-brand-red transition-colors font-sans"
+        className="w-full h-full bg-transparent border border-[rgba(255,255,255,0.35)] rounded-full pl-12 pr-6 text-xs text-white placeholder-neutral-400 focus:outline-none focus:border-brand-red transition-colors font-sans"
       />
-      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none">
-        <Search className="w-5 h-5 text-white" />
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none flex items-center">
+        <Search className="w-4 h-4 text-white" />
       </div>
     </form>
   );

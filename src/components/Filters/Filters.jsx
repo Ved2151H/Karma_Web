@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import FilterSection from './FilterSection';
+import { ProductContext } from '../../context/ProductContext';
+import { CATEGORY_SUBCATEGORIES } from '../../constants/categories';
 
 function Filters({
   category,
@@ -16,6 +18,8 @@ function Filters({
   toggleSNR,
   toggleReusable
 }) {
+  const { products: allProducts = [] } = useContext(ProductContext) || {};
+
   const {
     subcategories = [],
     brands = [],
@@ -46,80 +50,31 @@ function Filters({
     setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const getSubcategoryCount = (subVal) => {
+    return allProducts.filter(p => p.category === category && p.subcategory === subVal).length;
+  };
+
   return (
     <div className="flex flex-col gap-1 pr-1 font-sans select-none">
       
       {/* SECTION 1: Subcategory */}
-      <FilterSection title="Category" isExpanded={expanded.subcategory} onToggle={() => toggleAccordion('subcategory')}>
-        <div className="flex flex-col gap-2.5 text-xs text-neutral-700 font-medium">
-          {category === 'hand' && (
-            <label className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
-              <input
-                type="checkbox"
-                checked={subcategories.includes('Safety Gloves')}
-                onChange={() => toggleSubcategory('Safety Gloves')}
-                className="rounded border-neutral-300 text-brand-red focus:ring-brand-red w-3.5 h-3.5 cursor-pointer"
-              />
-              <span>Safety Gloves (71)</span>
-            </label>
-          )}
-          {category === 'face' && (
-            <label className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
-              <input
-                type="checkbox"
-                checked={subcategories.includes('Welding and Face Shield')}
-                onChange={() => toggleSubcategory('Welding and Face Shield')}
-                className="rounded border-neutral-300 text-brand-red focus:ring-brand-red w-3.5 h-3.5 cursor-pointer"
-              />
-              <span>Welding and Face Shield (7)</span>
-            </label>
-          )}
-          {category === 'eye' && (
-            <>
-              <label className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
+      {CATEGORY_SUBCATEGORIES[category] && (
+        <FilterSection title="Category" isExpanded={expanded.subcategory} onToggle={() => toggleAccordion('subcategory')}>
+          <div className="flex flex-col gap-2.5 text-xs text-neutral-700 font-medium">
+            {CATEGORY_SUBCATEGORIES[category].map((sub) => (
+              <label key={sub.value} className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
                 <input
                   type="checkbox"
-                  checked={subcategories.includes('Safety Goggles and Spectacles')}
-                  onChange={() => toggleSubcategory('Safety Goggles and Spectacles')}
+                  checked={subcategories.includes(sub.value)}
+                  onChange={() => toggleSubcategory(sub.value)}
                   className="rounded border-neutral-300 text-brand-red focus:ring-brand-red w-3.5 h-3.5 cursor-pointer"
                 />
-                <span>Safety Goggles and Spectacles (28)</span>
+                <span>{sub.label} ({getSubcategoryCount(sub.value)})</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
-                <input
-                  type="checkbox"
-                  checked={subcategories.includes('Eye Accessories')}
-                  onChange={() => toggleSubcategory('Eye Accessories')}
-                  className="rounded border-neutral-300 text-brand-red focus:ring-brand-red w-3.5 h-3.5 cursor-pointer"
-                />
-                <span>Eye Accessories (2)</span>
-              </label>
-            </>
-          )}
-          {category === 'hearing' && (
-            <>
-              <label className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
-                <input
-                  type="checkbox"
-                  checked={subcategories.includes('Ear Plugs')}
-                  onChange={() => toggleSubcategory('Ear Plugs')}
-                  className="rounded border-neutral-300 text-brand-red focus:ring-brand-red w-3.5 h-3.5 cursor-pointer"
-                />
-                <span>Ear Plugs (7)</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer hover:text-brand-red">
-                <input
-                  type="checkbox"
-                  checked={subcategories.includes('Ear Muffs')}
-                  onChange={() => toggleSubcategory('Ear Muffs')}
-                  className="rounded border-neutral-300 text-brand-red focus:ring-brand-red w-3.5 h-3.5 cursor-pointer"
-                />
-                <span>Ear Muffs (4)</span>
-              </label>
-            </>
-          )}
-        </div>
-      </FilterSection>
+            ))}
+          </div>
+        </FilterSection>
+      )}
 
       {/* SECTION 2: Shop Industries */}
       <FilterSection title="Shop Industries" isExpanded={expanded.industry} onToggle={() => toggleAccordion('industry')}>

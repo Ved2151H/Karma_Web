@@ -46,6 +46,7 @@ function App() {
                 <Route element={<MainLayout />}>
                   <Route path={ROUTES.HOME} element={<Home />} />
                   <Route path={ROUTES.CATEGORY} element={<CategoryPage />} />
+                  <Route path="/:category/:subcategory" element={<CategoryPage />} />
                   
                   {/* Category root shortcuts matching route specs */}
                   <Route path="/face" element={<Navigate to="/category/face" replace />} />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductContext } from '../../context/ProductContext';
 import { Plus, Edit3, Trash2, Search, X, Loader, SlidersHorizontal, Image as ImageIcon } from 'lucide-react';
+import { CATEGORY_SUBCATEGORIES } from '../../constants/categories';
 
 function ProductsManagement() {
   const { products, addProduct, updateProduct, deleteProduct, loading } = useProductContext();
@@ -17,9 +18,16 @@ function ProductsManagement() {
   // Form states
   const [formName, setFormName] = useState('');
   const [formCategory, setFormCategory] = useState('hand');
+  const [formSubcategory, setFormSubcategory] = useState('');
   const [formPrice, setFormPrice] = useState('');
   const [formStock, setFormStock] = useState('');
   const [formImage, setFormImage] = useState('');
+
+  // Helper to change category and auto-select its first subcategory
+  const handleCategoryChange = (catVal) => {
+    setFormCategory(catVal);
+    setFormSubcategory(CATEGORY_SUBCATEGORIES[catVal]?.[0]?.value || '');
+  };
 
   // Delete product action
   const handleDelete = (id) => {
@@ -32,6 +40,7 @@ function ProductsManagement() {
   const openAddModal = () => {
     setFormName('');
     setFormCategory('hand');
+    setFormSubcategory(CATEGORY_SUBCATEGORIES['hand']?.[0]?.value || '');
     setFormPrice('');
     setFormStock('');
     setFormImage('https://images.unsplash.com/photo-1590786275628-309e52d713be?q=80&w=600');
@@ -47,6 +56,7 @@ function ProductsManagement() {
       id: `${formCategory}-${Date.now()}`,
       title: formName,
       category: formCategory,
+      subcategory: formSubcategory,
       price: Number(formPrice),
       stock: Number(formStock),
       image: formImage || 'https://images.unsplash.com/photo-1590786275628-309e52d713be?q=80&w=600',
@@ -64,6 +74,7 @@ function ProductsManagement() {
     setCurrentProduct(product);
     setFormName(product.title);
     setFormCategory(product.category);
+    setFormSubcategory(product.subcategory || CATEGORY_SUBCATEGORIES[product.category]?.[0]?.value || '');
     setFormPrice(product.price.toString());
     setFormStock(product.stock.toString());
     setFormImage(product.image);
@@ -78,6 +89,7 @@ function ProductsManagement() {
     updateProduct(currentProduct.id, {
       title: formName,
       category: formCategory,
+      subcategory: formSubcategory,
       price: Number(formPrice),
       stock: Number(formStock),
       image: formImage
@@ -295,15 +307,15 @@ function ProductsManagement() {
                   <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Category</label>
                   <select
                     value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937] cursor-pointer"
                   >
-                    <option value="hand">Hand Protection</option>
                     <option value="face">Face Protection</option>
-                    <option value="eye">Eye Protection</option>
-                    <option value="hearing">Hearing Protection</option>
                     <option value="foot">Foot Protection</option>
+                    <option value="eye">Eye Protection</option>
+                    <option value="hand">Hand Protection</option>
                     <option value="head">Head Protection</option>
+                    <option value="hearing">Hearing Protection</option>
                     <option value="fall-protection">Fall Protection</option>
                     <option value="respiratory">Respiratory Protection</option>
                     <option value="workwear">Workwear</option>
@@ -311,6 +323,23 @@ function ProductsManagement() {
                   </select>
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Subcategory</label>
+                  <select
+                    value={formSubcategory}
+                    onChange={(e) => setFormSubcategory(e.target.value)}
+                    className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937] cursor-pointer"
+                  >
+                    {CATEGORY_SUBCATEGORIES[formCategory]?.map((sub) => (
+                      <option key={sub.value} value={sub.value}>
+                        {sub.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Price (INR)</label>
                   <input
@@ -323,9 +352,7 @@ function ProductsManagement() {
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-550 focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Initial Stock</label>
                   <input
@@ -338,17 +365,17 @@ function ProductsManagement() {
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-550 focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Image URL</label>
-                  <input
-                    type="text"
-                    value={formImage}
-                    onChange={(e) => setFormImage(e.target.value)}
-                    placeholder="https://unsplash.com/..."
-                    className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-550 focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Image URL</label>
+                <input
+                  type="text"
+                  value={formImage}
+                  onChange={(e) => setFormImage(e.target.value)}
+                  placeholder="https://unsplash.com/..."
+                  className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-550 focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
+                />
               </div>
 
               <div className="pt-4 border-t border-gray-800/80 flex justify-end gap-3">
@@ -401,15 +428,15 @@ function ProductsManagement() {
                   <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Category</label>
                   <select
                     value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937] cursor-pointer"
                   >
-                    <option value="hand">Hand Protection</option>
                     <option value="face">Face Protection</option>
-                    <option value="eye">Eye Protection</option>
-                    <option value="hearing">Hearing Protection</option>
                     <option value="foot">Foot Protection</option>
+                    <option value="eye">Eye Protection</option>
+                    <option value="hand">Hand Protection</option>
                     <option value="head">Head Protection</option>
+                    <option value="hearing">Hearing Protection</option>
                     <option value="fall-protection">Fall Protection</option>
                     <option value="respiratory">Respiratory Protection</option>
                     <option value="workwear">Workwear</option>
@@ -417,6 +444,23 @@ function ProductsManagement() {
                   </select>
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Subcategory</label>
+                  <select
+                    value={formSubcategory}
+                    onChange={(e) => setFormSubcategory(e.target.value)}
+                    className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937] cursor-pointer"
+                  >
+                    {CATEGORY_SUBCATEGORIES[formCategory]?.map((sub) => (
+                      <option key={sub.value} value={sub.value}>
+                        {sub.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Price (INR)</label>
                   <input
@@ -428,9 +472,7 @@ function ProductsManagement() {
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Current Stock</label>
                   <input
@@ -442,16 +484,16 @@ function ProductsManagement() {
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Image URL</label>
-                  <input
-                    type="text"
-                    value={formImage}
-                    onChange={(e) => setFormImage(e.target.value)}
-                    className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Image URL</label>
+                <input
+                  type="text"
+                  value={formImage}
+                  onChange={(e) => setFormImage(e.target.value)}
+                  className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937]"
+                />
               </div>
 
               <div className="pt-4 border-t border-gray-800/80 flex justify-end gap-3">
