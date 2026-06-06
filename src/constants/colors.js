@@ -1,0 +1,9 @@
+export const COLORS = {
+  PRIMARY_RED: '#E31E24',
+  HEADER: '#1F1F1F',
+  NAVBAR: '#161616',
+  BACKGROUND: '#FFFFFF',
+  BORDER: '#E5E7EB',
+  GRAY_LIGHT: '#F9FAFB',
+  GRAY_DARK: '#374151',
+};
