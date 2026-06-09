@@ -2,11 +2,15 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogIn } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { NAV_LINKS } from '../../constants/navLinks';
+import { useCategories } from '../../hooks/useCategories';
 import SearchBar from '../SearchBar/SearchBar';
 
 function MobileMenu({ isOpen, onClose }) {
   const location = useLocation();
+  const { categories } = useCategories();
+
+  // Show only active categories
+  const activeCategories = categories.filter(c => c.status === 'Active');
 
   return (
     <AnimatePresence>
@@ -50,12 +54,13 @@ function MobileMenu({ isOpen, onClose }) {
 
             {/* Navigation links */}
             <div className="flex flex-col gap-1 flex-1">
-              {NAV_LINKS.map((link) => {
-                const isActive = location.pathname === link.path;
+              {activeCategories.map((link) => {
+                const categoryPath = `/category/${link.id}`;
+                const isActive = location.pathname === categoryPath;
                 return (
                   <Link
-                    key={link.label}
-                    to={link.path}
+                    key={link.id}
+                    to={categoryPath}
                     onClick={onClose}
                     className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive
@@ -63,7 +68,7 @@ function MobileMenu({ isOpen, onClose }) {
                         : 'text-gray-700 hover:bg-gray-50 hover:text-brand-red'
                     }`}
                   >
-                    {link.label}
+                    {link.label || link.name}
                   </Link>
                 );
               })}

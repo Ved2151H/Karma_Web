@@ -17,6 +17,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProductProvider } from './context/ProductContext';
+import { CategoryProvider } from './context/CategoryContext';
 
 // Import Route Guards
 import UserRoutes from './routes/UserRoutes';
@@ -36,11 +37,12 @@ function App() {
   return (
     <AuthProvider>
       <ProductProvider>
-        <UIProvider>
-          <SearchProvider>
-            <WishlistProvider>
-              <CartProvider>
-                <Routes>
+        <CategoryProvider>
+          <UIProvider>
+            <SearchProvider>
+              <WishlistProvider>
+                <CartProvider>
+                  <Routes>
                 
                 {/* 1. Public client-side routes wrapped in MainLayout */}
                 <Route element={<MainLayout />}>
@@ -102,6 +104,7 @@ function App() {
             </WishlistProvider>
           </SearchProvider>
         </UIProvider>
+        </CategoryProvider>
       </ProductProvider>
     </AuthProvider>
   );

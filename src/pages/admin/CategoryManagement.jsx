@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit3, Trash2, Search, X, FolderKanban } from 'lucide-react';
+import { Plus, Edit3, Trash2, Search, X, FolderKanban, Loader } from 'lucide-react';
+import { useCategories } from '../../hooks/useCategories';
+import { useProductContext } from '../../context/ProductContext';
 
 function CategoryManagement() {
-  const [categories, setCategories] = useState([
-    { id: 'cat-1', name: 'Face Protection', count: 12, status: 'Active' },
-    { id: 'cat-2', name: 'Foot Protection', count: 18, status: 'Active' },
-    { id: 'cat-3', name: 'Eye Protection', count: 15, status: 'Active' },
-    { id: 'cat-4', name: 'Hand Protection', count: 20, status: 'Active' },
-    { id: 'cat-5', name: 'Head Protection', count: 10, status: 'Active' },
-    { id: 'cat-6', name: 'Hearing Protection', count: 14, status: 'Active' },
-    { id: 'cat-7', name: 'Fall Protection', count: 22, status: 'Active' },
-    { id: 'cat-8', name: 'Respiratory Protection', count: 16, status: 'Active' },
-    { id: 'cat-9', name: 'Workwear', count: 8, status: 'Active' },
-    { id: 'cat-10', name: 'Gas Detectors', count: 5, status: 'Active' },
-  ]);
+  const { categories, createCategory, updateCategory, deleteCategory, loading } = useCategories();
+  const { products } = useProductContext();
 
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -27,10 +19,14 @@ function CategoryManagement() {
   const [formName, setFormName] = useState('');
   const [formStatus, setFormStatus] = useState('Active');
 
+  const getProductCount = (categorySlug) => {
+    return products.filter(p => p.category === categorySlug).length;
+  };
+
   // Delete category
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      setCategories(categories.filter(c => c.id !== id));
+    if (window.confirm('Are you sure you want to delete this category? All associated products will remain, but their category mappings might be affected.')) {
+      deleteCategory(id);
     }
   };
 
@@ -46,14 +42,21 @@ function CategoryManagement() {
     e.preventDefault();
     if (!formName.trim()) return;
 
+    // Generate a clean slug from name to be used as ID
+    const generatedSlug = formName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
     const newCategory = {
-      id: `cat-${Date.now()}`,
-      name: formName,
-      count: 0,
+      id: generatedSlug,
+      name: formName.trim(),
+      label: formName.trim().replace(/\s+Protection$/i, ''),
       status: formStatus
     };
 
-    setCategories([...categories, newCategory]);
+    createCategory(newCategory);
     setIsAddOpen(false);
   };
 
@@ -70,15 +73,11 @@ function CategoryManagement() {
     e.preventDefault();
     if (!formName.trim()) return;
 
-    setCategories(categories.map(c => 
-      c.id === currentCategory.id 
-        ? {
-            ...c,
-            name: formName,
-            status: formStatus
-          }
-        : c
-    ));
+    updateCategory(currentCategory.id, {
+      name: formName.trim(),
+      label: formName.trim().replace(/\s+Protection$/i, ''),
+      status: formStatus
+    });
     setIsEditOpen(false);
   };
 
@@ -115,7 +114,7 @@ function CategoryManagement() {
             placeholder="Search categories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-red focus:bg-[#1f2937] transition-all duration-200"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-550 focus:outline-none focus:border-brand-red focus:bg-[#1f2937] transition-all duration-200"
           />
         </div>
       </div>
@@ -133,7 +132,16 @@ function CategoryManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/80 text-gray-350">
-              {filteredCategories.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-12 text-gray-500 font-medium animate-pulse">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader className="w-5 h-5 animate-spin text-brand-red" />
+                      <span>Loading categories...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredCategories.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="text-center py-12 text-gray-500 font-medium">
                     No categories found.
@@ -156,7 +164,7 @@ function CategoryManagement() {
 
                       {/* Products Count */}
                       <td className="px-4 py-4 font-mono font-semibold text-gray-300">
-                        {cat.count} items
+                        {getProductCount(cat.id)} items
                       </td>
 
                       {/* Status */}

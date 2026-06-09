@@ -3,12 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useCategories } from '../hooks/useCategories';
 
 export function ProductPage() {
   const { id } = useParams();
   const { getProductById, loading } = useProducts();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { categories } = useCategories();
 
   const product = useMemo(() => {
     return getProductById(id);
@@ -39,10 +41,14 @@ export function ProductPage() {
   const { title, image, price, originalPrice, discount, badge, description, stock, rating, category, brand, industry, material, resistanceType, countryOfOrigin } = product;
   const isWishlisted = isInWishlist(id);
 
+  // Get matching category display name
+  const categoryObj = categories.find(c => c.id === category);
+  const categoryName = categoryObj ? categoryObj.name : (category ? category.charAt(0).toUpperCase() + category.slice(1) + ' Protection' : 'Safety Equipment');
+
   // Generate specs dynamically from available fields
   const specs = [
     { label: 'Brand', value: brand || 'KARAM' },
-    { label: 'Category', value: category ? category.charAt(0).toUpperCase() + category.slice(1) + ' Protection' : 'Safety Equipment' },
+    { label: 'Category', value: categoryName },
     { label: 'Industry Scope', value: industry || 'General Purpose' },
     { label: 'Material Composition', value: material || 'N/A' },
     { label: 'Protection Type', value: resistanceType || 'N/A' },
@@ -56,7 +62,7 @@ export function ProductPage() {
         <div className="text-xs text-neutral-400 font-semibold mb-8">
           <Link to="/" className="hover:text-[#E31E24]">Home</Link>
           <span className="mx-2">/</span>
-          <Link to={`/category/${category}`} className="capitalize hover:text-[#E31E24]">{category} Protection</Link>
+          <Link to={`/category/${category}`} className="capitalize hover:text-[#E31E24]">{categoryName}</Link>
           <span className="mx-2">/</span>
           <span className="text-neutral-850 truncate max-w-[200px] inline-block align-bottom">{title}</span>
         </div>

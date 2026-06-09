@@ -5,10 +5,18 @@ import { X, Filter } from 'lucide-react';
 import useProducts from '../hooks/useProducts';
 import Filters from '../components/Filters/Filters';
 import ProductGrid from '../components/ProductGrid/ProductGrid';
+import { useCategories } from '../hooks/useCategories';
 
 function CategoryPage() {
   const { category, subcategory } = useParams();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const { categories } = useCategories();
+
+  // Find the category display name dynamically
+  const currentCategoryObj = categories.find(c => c.id === category);
+  const categoryTitle = currentCategoryObj 
+    ? currentCategoryObj.name 
+    : (category ? category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Safety Products');
 
   // Mount the custom hook to handle all filter state and sorting computation
   const {
@@ -30,8 +38,23 @@ function CategoryPage() {
   } = useProducts(category, subcategory);
 
   return (
-    <div className="w-full bg-white min-h-screen">
-      {/* Category split layout starts immediately below the navbar */}
+    <div className="w-full bg-white min-h-screen font-sans">
+      {/* Dynamic Category Banner */}
+      <div className="w-full bg-[#1B1B1B] text-white py-12 px-5 select-none border-b border-neutral-900 shadow-inner">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="text-[10px] uppercase font-bold text-brand-red tracking-widest mb-1.5">
+            KARAM Safety Equipment
+          </div>
+          <h1 className="text-3xl font-black uppercase tracking-wider font-display">
+            {categoryTitle}
+          </h1>
+          <p className="text-neutral-400 text-xs sm:text-sm mt-2 font-medium max-w-2xl leading-relaxed">
+            Professional-grade {categoryTitle.toLowerCase()} solutions engineered to provide maximum security, comfort, and durability in hazardous industrial work environments.
+          </p>
+        </div>
+      </div>
+
+      {/* Category split layout starts immediately below the banner */}
       <div className="max-w-[1320px] mx-auto px-5 py-8 flex flex-col md:flex-row gap-[32px] items-start w-full">
         
         {/* Desktop Sidebar Filters (280px Width, Hidden on Mobile/Tablet) */}

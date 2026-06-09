@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useProductContext } from '../../context/ProductContext';
 import { Plus, Edit3, Trash2, Search, X, Loader, SlidersHorizontal, Image as ImageIcon } from 'lucide-react';
 import { CATEGORY_SUBCATEGORIES } from '../../constants/categories';
+import { useCategories } from '../../hooks/useCategories';
 
 function ProductsManagement() {
   const { products, addProduct, updateProduct, deleteProduct, loading } = useProductContext();
+  const { categories } = useCategories();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -149,16 +151,11 @@ function ProductsManagement() {
             className="bg-[#1f2937]/50 border border-gray-800 text-xs text-white px-3 py-2 rounded-xl focus:outline-none focus:border-brand-red cursor-pointer"
           >
             <option value="all">All Categories</option>
-            <option value="hand">Hand Protection</option>
-            <option value="face">Face Protection</option>
-            <option value="eye">Eye Protection</option>
-            <option value="hearing">Hearing Protection</option>
-            <option value="foot">Foot Protection</option>
-            <option value="head">Head Protection</option>
-            <option value="fall-protection">Fall Protection</option>
-            <option value="respiratory">Respiratory Protection</option>
-            <option value="workwear">Workwear</option>
-            <option value="gas-detector">Gas Detectors</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -310,16 +307,11 @@ function ProductsManagement() {
                     onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937] cursor-pointer"
                   >
-                    <option value="face">Face Protection</option>
-                    <option value="foot">Foot Protection</option>
-                    <option value="eye">Eye Protection</option>
-                    <option value="hand">Hand Protection</option>
-                    <option value="head">Head Protection</option>
-                    <option value="hearing">Hearing Protection</option>
-                    <option value="fall-protection">Fall Protection</option>
-                    <option value="respiratory">Respiratory Protection</option>
-                    <option value="workwear">Workwear</option>
-                    <option value="gas-detector">Gas Detector</option>
+                    {categories.filter(c => c.status === 'Active').map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -431,16 +423,11 @@ function ProductsManagement() {
                     onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-4.5 py-3 bg-[#1f2937]/50 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-red focus:bg-[#1f2937] cursor-pointer"
                   >
-                    <option value="face">Face Protection</option>
-                    <option value="foot">Foot Protection</option>
-                    <option value="eye">Eye Protection</option>
-                    <option value="hand">Hand Protection</option>
-                    <option value="head">Head Protection</option>
-                    <option value="hearing">Hearing Protection</option>
-                    <option value="fall-protection">Fall Protection</option>
-                    <option value="respiratory">Respiratory Protection</option>
-                    <option value="workwear">Workwear</option>
-                    <option value="gas-detector">Gas Detector</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

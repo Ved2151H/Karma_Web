@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useUI } from '../../context/UIContext';
+import { useCategories } from '../../hooks/useCategories';
 
 function CartDrawer() {
   const { isCartOpen, setIsCartOpen } = useUI();
   const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const { categories } = useCategories();
 
   const handleCheckout = () => {
     alert('Proceeding to checkout with amount: ₹' + cartTotal);
@@ -102,8 +104,11 @@ function CartDrawer() {
                           <h5 className="text-base font-semibold text-neutral-900 line-clamp-1 pr-6 leading-tight">
                             {item.title}
                           </h5>
-                          <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block mt-0.5">
-                            {item.category} Protection
+                          <span className="text-[10px] text-neutral-450 font-bold uppercase tracking-wider block mt-0.5">
+                            {(() => {
+                              const categoryObj = categories.find(c => c.id === item.category);
+                              return categoryObj ? categoryObj.name : (item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) + ' Protection' : 'Safety Equipment');
+                            })()}
                           </span>
                         </div>
 
