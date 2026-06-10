@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  DISPATCHED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  phone        String?    @unique
+  passwordHash String
+  role         Role       @default(CUSTOMER)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  orders        Order[]
+  cart          Cart?
+  wishlistItems WishlistItem[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String         @id @default(cuid())
+  name      String
+  slug      String         @unique
+  status    CategoryStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  subcategories Subcategory[]
+  products      Product[]
+
+  @@map("categories")
+}
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category    Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subsections Subsection[]
+  products    Product[]
+
+  @@unique([categoryId, slug])
+  @@map("subcategories")
+}
+
+model Subsection {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String
+  subcategoryId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  products      Product[]
+
+  @@unique([subcategoryId, slug])
+  @@map("subsections")
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  image            String
+  price            Decimal  @db.Decimal(10, 2)
+  originalPrice    Decimal? @db.Decimal(10, 2)
+  discount         Int?
+  badge            String?
+  brand            String   @default("KARAM")
+  industry         String?
+  material         String?
+  resistanceType   String?
+  lensType         String?
+  snrDnr           String?
+  reusable         String?
+  countryOfOrigin  String?  @default("India")
+  rating           Float    @default(0)
+  stock            Int      @default(0)
+  dateAdded        DateTime @default(now())
+  categoryId       String
+  subcategoryId    String
+  subsectionId     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  attributes       Json?
+  highlights       Json?
+  specs            Json?
+  images           Json?
+  reviews          Json?
+
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  subcategory   Subcategory    @relation(fields: [subcategoryId], references: [id], onDelete: Restrict)
+  subsection    Subsection?    @relation(fields: [subsectionId], references: [id], onDelete: Restrict)
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+
+  @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([subsectionId])
+  @@index([brand])
+  @@index([dateAdded])
+  @@map("products")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  userId      String
+  total       Decimal     @db.Decimal(10, 2)
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String?
+  title     String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("order_items")
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+model StoreSettings {
+  id        String   @id @default("default")
+  storeName String   @default("KARAM Safety Online Store")
+  email     String   @default("support@karam.in")
+  phone     String   @default("+91 120 4734400")
+  address   String   @default("D-95, Sector 63, Noida, Uttar Pradesh 201301, India")
+  updatedAt DateTime @updatedAt
+
+  @@map("store_settings")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String?
+  username  String
+  action    String
+  ipAddress String?
+  status    AuditStatus @default(SUCCESS)
+  createdAt DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}
